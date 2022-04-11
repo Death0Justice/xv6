@@ -71,6 +71,22 @@ argptr(int n, char **pp, int size)
   return 0;
 }
 
+// An 'overload' of the above method, to support void* addr
+int
+argptr_void(int n, void **pp, int size)
+{
+  int i;
+  struct proc *curproc = myproc();
+ 
+  if(argint(n, &i) < 0)
+    return -1;
+  if(size < 0 || (uint)i >= curproc->vlimit || (uint)i+size > curproc->vlimit
+    || (uint)i < curproc->vbase || (uint)i+size <= curproc->vbase)
+    return -1;
+  *pp = (void*)i;
+  return 0;
+}
+
 // Fetch the nth word-sized system call argument as a string pointer.
 // Check that the pointer is valid and the string is nul-terminated.
 // (There is no shared writable memory, so the string can't change
@@ -96,6 +112,7 @@ extern int sys_kill(void);
 extern int sys_link(void);
 extern int sys_mkdir(void);
 extern int sys_mknod(void);
+extern int sys_mprotect(void);
 extern int sys_open(void);
 extern int sys_pipe(void);
 extern int sys_read(void);
@@ -128,6 +145,7 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_mprotect] sys_mprotect,
 };
 
 void

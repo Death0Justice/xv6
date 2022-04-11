@@ -89,3 +89,18 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// protect the given address place as read-only
+// return 0 if success
+int
+sys_mprotect(void) 
+{
+  void* addr;
+  int len;
+
+  if(argint(1, &len) < 0 || argptr_void(0, &addr, len*PGSIZE) < 0)
+    return -1;
+  
+  cprintf("Hello world at address 0x%x, length %d\n", addr, len);
+  return 0;
+}
