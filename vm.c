@@ -402,17 +402,32 @@ mprotect(void* addr, int len)
   pte_t* pte;
   struct proc* curproc = myproc();
 
+  if(len <= 0 || (uint)addr+len*PGSIZE > curproc->vlimit)
+  {
+    panic("mprotect: wrong length\n");
+    return -1;
+  }
   if((uint) addr % PGSIZE != 0)
-    panic("mprotect: addr must be page aligned");
+  {
+    panic("mprotect: addr must be page aligned\n");
+    return -1;
+  }
   // find page table entry
   // and make it read-only
   for(int i = 0; i < len; i++)
   {
     if((pte = walkpgdir(curproc->pgdir, addr+i*PGSIZE, 0)) == 0)
-      panic("mprotect: address should exist");
+    {
+      panic("mprotect: address should exist\n");
+      return -1;
+    }
+    if(((*pte & PTE_U) == 0) || ((*pte & PTE_P) == 0))
+      return -1;
+
     *pte &= ~PTE_W;
   }
-  lcr3(V2P(addr));
+  // flush TLB by reloading CR3
+  lcr3(V2P(curproc->pgdir));
   // cprintf("Hello world at address 0x%x, length %d\n", addr, len);
   return 0;
 }
@@ -427,18 +442,33 @@ munprotect(void* addr, int len)
   pte_t* pte;
   struct proc* curproc = myproc();
 
+  if(len <= 0 || (uint)addr+len*PGSIZE > curproc->vlimit)
+  {
+    panic("mprotect: wrong length\n");
+    return -1;
+  }
   if((uint) addr % PGSIZE != 0)
-    panic("mprotect: addr must be page aligned");
+  {
+    panic("mprotect: addr must be page aligned\n");
+    return -1;
+  }
   // find page table entry
   // and make it read-write
   for(int i = 0; i < len; i++)
   {
     if((pte = walkpgdir(curproc->pgdir, addr+i*PGSIZE, 0)) == 0)
-      panic("mprotect: address should exist");
-    *pte &= PTE_W;
+    {
+      panic("mprotect: address should exist\n");
+      return -1;
+    }
+    if(((*pte & PTE_U) == 0) || ((*pte & PTE_P) == 0))
+      return -1;
+
+    *pte |= PTE_W;
   }
-  lcr3(V2P(addr));
-  cprintf("Hello world at address 0x%x, length %d\n", addr, len);
+  // flush TLB by reloading CR3
+  lcr3(V2P(curproc->pgdir));
+  // cprintf("Hello world at address 0x%x, length %d\n", addr, len);
   return 0;
 }
 
