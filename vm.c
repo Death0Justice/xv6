@@ -392,6 +392,56 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
   return 0;
 }
 
+// protect pages from given addresses as read-only
+// addr is the address to the start of a page
+// len is the number of pages to be protected
+// return 0 if success, -1 otherwise
+int
+mprotect(void* addr, int len) 
+{
+  pte_t* pte;
+  struct proc* curproc = myproc();
+
+  if((uint) addr % PGSIZE != 0)
+    panic("mprotect: addr must be page aligned");
+  // find page table entry
+  // and make it read-only
+  for(int i = 0; i < len; i++)
+  {
+    if((pte = walkpgdir(curproc->pgdir, addr+i*PGSIZE, 0)) == 0)
+      panic("mprotect: address should exist");
+    *pte &= ~PTE_W;
+  }
+  lcr3(V2P(addr));
+  // cprintf("Hello world at address 0x%x, length %d\n", addr, len);
+  return 0;
+}
+
+// unprotect pages from given addresses as read-only
+// addr is the address to an entry in the page table
+// len is the number of pages to be protected
+// return 0 if success, -1 otherwise
+int
+munprotect(void* addr, int len) 
+{
+  pte_t* pte;
+  struct proc* curproc = myproc();
+
+  if((uint) addr % PGSIZE != 0)
+    panic("mprotect: addr must be page aligned");
+  // find page table entry
+  // and make it read-write
+  for(int i = 0; i < len; i++)
+  {
+    if((pte = walkpgdir(curproc->pgdir, addr+i*PGSIZE, 0)) == 0)
+      panic("mprotect: address should exist");
+    *pte &= PTE_W;
+  }
+  lcr3(V2P(addr));
+  cprintf("Hello world at address 0x%x, length %d\n", addr, len);
+  return 0;
+}
+
 //PAGEBREAK!
 // Blank page.
 //PAGEBREAK!

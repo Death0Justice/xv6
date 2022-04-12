@@ -118,7 +118,7 @@ sys_munprotect(void)
 
   if(argint(1, &len) < 0 || argptr_void(0, &addr, len*PGSIZE) < 0)
   {
-    cprintf("Something is wrong with the arg-get process.\n");
+    panic("Something is wrong with the arg-get process.\n");
     cprintf("argint: %d, argptr:0x%x\n", argint(1, &len), argptr_void(0, &addr, len*PGSIZE));
     return -1;
   }
