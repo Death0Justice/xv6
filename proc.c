@@ -498,6 +498,38 @@ kill(int pid)
   return -1;
 }
 
+// protect pages in given addresses as read-only
+// addr is the address to an entry in the page table
+// len is the number of pages to be protected
+// return 0 if success, -1 otherwise
+int
+mprotect(void* addr, int len) 
+{
+  for(int i = 0; i < len; i++)
+  {
+    // set the page unwritable
+    *((uint *)addr + i) &= ~PTE_W;
+  }
+  lcr3(V2P(addr));
+  cprintf("Hello world at address 0x%x, length %d\n", addr, len);
+  return 0;
+}
+
+// protect the given address place as read-only
+// return 0 if success
+int
+munprotect(void* addr, int len) 
+{ 
+  for(int i = 0; i < len; i++)
+  {
+    // set the page writable
+    *((uint *)addr + i) &= PTE_W;
+  }
+  lcr3(V2P(addr));
+  cprintf("Hello world at address 0x%x, length %d\n", addr, len);
+  return 0;
+}
+
 //PAGEBREAK: 36
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.

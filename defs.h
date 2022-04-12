@@ -108,6 +108,8 @@ void            exit(void);
 int             fork(void);
 int             growproc(int);
 int             kill(int);
+int             mprotect(void*, int);
+int             munprotect(void*, int);
 struct cpu*     mycpu(void);
 struct proc*    myproc();
 void            pinit(void);

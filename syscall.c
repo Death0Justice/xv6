@@ -113,6 +113,7 @@ extern int sys_link(void);
 extern int sys_mkdir(void);
 extern int sys_mknod(void);
 extern int sys_mprotect(void);
+extern int sys_munprotect(void);
 extern int sys_open(void);
 extern int sys_pipe(void);
 extern int sys_read(void);
@@ -146,6 +147,7 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_mprotect] sys_mprotect,
+[SYS_munprotect] sys_munprotect,
 };
 
 void

@@ -99,8 +99,29 @@ sys_mprotect(void)
   int len;
 
   if(argint(1, &len) < 0 || argptr_void(0, &addr, len*PGSIZE) < 0)
+  {
+    cprintf("Something is wrong with the arg-get process.\n");
+    cprintf("argint: %d, argptr:0x%x\n", argint(1, &len), argptr_void(0, &addr, len*PGSIZE));
     return -1;
-  
-  cprintf("Hello world at address 0x%x, length %d\n", addr, len);
-  return 0;
+  }
+
+  return mprotect(addr, len);
+}
+
+// unprotect the given address place
+// return 0 if success
+int
+sys_munprotect(void) 
+{
+  void* addr;
+  int len;
+
+  if(argint(1, &len) < 0 || argptr_void(0, &addr, len*PGSIZE) < 0)
+  {
+    cprintf("Something is wrong with the arg-get process.\n");
+    cprintf("argint: %d, argptr:0x%x\n", argint(1, &len), argptr_void(0, &addr, len*PGSIZE));
+    return -1;
+  }
+
+  return munprotect(addr, len);
 }
